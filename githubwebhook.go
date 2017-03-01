@@ -16,7 +16,7 @@ type EventHandler struct {
 	eventHooks   map[string][]HookFunc
 }
 
-type HookFunc func(event string, body []byte)
+type HookFunc func(event, id string, body []byte)
 
 func NewEventHandler(signatureKey []byte) *EventHandler {
 	server := &EventHandler{
@@ -41,9 +41,10 @@ func (self *EventHandler) Handler() func(http.ResponseWriter, *http.Request) {
 		}
 		w.WriteHeader(http.StatusOK)
 		event := r.Header.Get("X-GitHub-Event")
+		id := r.Header.Get("X-GitHub-Delivery")
 		if events, ok := self.eventHooks[event]; ok {
 			for _, hook := range events {
-				hook(event, body)
+				hook(event, id, body)
 			}
 		}
 	}
